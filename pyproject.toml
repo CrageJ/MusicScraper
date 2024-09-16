@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "musicscraper"
+version = "0.1.0"
+description = ""
+authors = ["CrageJ <59778978+CrageJ@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+beautifulsoup4 = "^4.12.3"
+aiosqlite = "^0.20.0"
+fastapi = {extras = ["standard"], version = "^0.114.2"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

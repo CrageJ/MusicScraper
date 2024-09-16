@@ -1,4 +1,2 @@
 # MusicScraper
-
-
-blah blah blah
+Run server with `poetry run fastapi dev main.py`

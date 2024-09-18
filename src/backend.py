@@ -10,32 +10,31 @@ from uuid import uuid4
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
+import asyncio
+class Backend:
+    def __init__(self):
+        self.app = FastAPI()
+        self.templates = Jinja2Templates(directory="templates")
+        self.list = [self.ListItem("test"), self.ListItem("test2"), self.ListItem("test3")]
 
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+    async def startup(self):
+        @self.app.get("/", response_class=HTMLResponse)
+        async def index(request: Request):
+            return self.templates.TemplateResponse(request=request, name="index.html")
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html")
+        @self.app.get("/list", response_class=HTMLResponse)
+        async def list_items(request: Request, hx_request: Annotated[Union[str, None], Header()] = None):
+            if hx_request:
+                return self.templates.TemplateResponse(
+                    request=request, name="list.html", context={"list": self.list}
+                )
+            return JSONResponse(content=jsonable_encoder(self.list))
 
+    class ListItem:
+        def __init__(self, text: str):
+            self.id = uuid4()
+            self.text = text
+            self.done = False
 
-
-
-
-
-class ListItem:
-    def __init__(self, text: str):
-        self.id = uuid4()
-        self.text = text
-        self.done = False
-
-list = [ListItem("test"), ListItem("test2"), ListItem("test3")]
-
-
-@app.get("/list", response_class=HTMLResponse)
-async def list_items(request: Request, hx_request: Annotated[Union[str, None], Header()] = None):
-    if hx_request:
-        return templates.TemplateResponse(
-            request=request, name="list.html", context={"list": list}
-        )
-    return JSONResponse(content=jsonable_encoder(list))
+backend = Backend()
+backend = asyncio.run(backend.startup())

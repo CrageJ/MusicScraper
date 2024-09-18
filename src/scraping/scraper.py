@@ -1,6 +1,14 @@
-
-from typing import List
 from enum import Enum
+
+from typing_extensions import List, Optional
+import cloudscraper
+from bs4 import BeautifulSoup
+import io
+
+from time import sleep
+from typing import Optional
+from dataclasses import dataclass
+
 
 class Database:
     def __init__(self,name):
@@ -33,18 +41,20 @@ class Website(Enum):
     METACRITIC = 4
 
 class Album:
-    def __init__(self,website:Website,album_name:str,artist:str,rank:int):
+    def __init__(self,name:str,artist,rank:int,rating:int,website:Website=Website.UNDEFINED):
         self.website = website
-        self.album_name = album_name
+        self.album = name
         self.artist = artist
         self.rank = rank
-
-
-
+        self.rating = rating
+    def __str__(self) -> str:
+        return self.album+" by "+self.artist+" : "+str(self.rank)
+    def __repr__(self) -> str:
+        return self.album+" by "+self.artist+" : "+str(self.rank)
 class Scraper:
     """Class to scrape a webpage, based on pages"""
-    def __init__(self,db,website:Website,url,items_per_page,starting_page=1):
-        self.db = db
+    def __init__(self,website:Website,name:str,url,items_per_page,starting_page:int):
+        self.name = name
         self.website = website
         self.url = url
         self.items_per_page = items_per_page
@@ -57,11 +67,25 @@ class Scraper:
         """Scrape the top X albums of YYYY year"""
         # Scrape the page
         pass
+    def scrape_page(self,year:int,page:int) -> str: # page starts at 0
+        """Scrape the page of the website"""
+        page_to_scrape = page + self.starting_page
+        try:
+            scraper = cloudscraper.create_scraper(
+                interpreter="nodejs",
+                delay=30,
+                browser={
+                    "browser": "chrome",
+                    "platform": "ios",
+                    "desktop": False,
+                }
+            )
+            response = scraper.get(self.url.format(page=page_to_scrape,year=year))
+            print(self.website.name+" : "+str(response.status_code))
+            return response.text
+        except Exception as e:
+            print(e)
+            return ''
 
-    def get_data(self,top_x,year,scrape_if_missing=False):
-        """Get the top X albums of YYYY year"""
-        # Get the data from db
-
-        # If some top_x data is missing and scrape_if_missing, scrape the page
-
+    def parse_html(self,response:str) -> Optional[List[Album]]:
         pass

@@ -1,2 +1,8 @@
 notes.txt
 src/__pycache__
+.env
+src/scraping/.ipynb_checkpoints/
+src/scraping/__pycache__
+/*.http
+/*.html
+/*.txt

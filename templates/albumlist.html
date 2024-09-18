@@ -1,0 +1,20 @@
+<!-- templates/albumlist.html -->
+<div class="listContainer">
+    <div class="albumInformation">
+        <h1>Website</h1>
+    </div>
+    {% for album in albums %}
+    <div class="albumContainer">
+        <div class="albumImage">
+            <img src="{{album.image}}" alt="{{album.title}}">
+        </div>
+        <div class="albumInformation">
+                <h2>{{album.title}}</h2>
+                <h3>{{album.artists_str}}</h3>
+            <a href="{{album.url}}">
+                <p>Click to go to Spotify Link</p>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>

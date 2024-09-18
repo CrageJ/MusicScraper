@@ -1,0 +1,39 @@
+body {
+    background-color: lightgray;
+    font-family: "Roboto", sans-serif;
+}
+
+h1 {
+    font-family: "Odibee Sans", sans-serif;
+    font-size: 5em;
+
+    color: blue;
+}
+
+.BodyContainer {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-direction: column;
+    vertical-align: text-top;
+}
+
+.BodyItem {
+    display: flex;
+    justify-content: center;
+    align-items: top;
+    flex-direction: row;
+    box-sizing: border-box;
+    gap: 1em;
+}
+
+.filledbox {
+    background-color: darkgray;
+    border-radius: 1em;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 1em;
+    //min-width: 20em;
+    box-sizing: border-box;
+
+}

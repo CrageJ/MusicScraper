@@ -1,15 +1,15 @@
 from typing_extensions import List, Optional
 import typing
-import scraper as s
-from scraper import Album
+
+from src.scraping.scraper import *
 import cloudscraper
 from bs4 import BeautifulSoup
 import io
 
-class BestEverAlbums(s.Scraper):
+class BestEverAlbums(Scraper):
     def __init__(self):
         super().__init__(
-            s.Website.BESTEVERALBUMS,
+            Website.BESTEVERALBUMS,
             "Best Ever Albums",
             "https://www.besteveralbums.com/yearstats.php?y={year}&f=&fv=&orderby=InfoRankScore&sortdir=DESC&page={page}",
             10,1)

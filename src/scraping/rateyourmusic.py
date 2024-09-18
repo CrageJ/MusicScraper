@@ -1,16 +1,16 @@
-import scraper as s
+
 from typing_extensions import List, Optional
 import typing
-import scraper as s
-from scraper import Album
+
+from src.scraping.scraper import *
 import cloudscraper
 from bs4 import BeautifulSoup
 import io
 
-class RateYourMusic(s.Scraper):
+class RateYourMusic(Scraper):
     def __init__(self):
         super().__init__(
-            s.Website.RATEYOURMUSIC,
+            Website.RATEYOURMUSIC,
             "Rate Your Music",
             "https://rateyourmusic.com/charts/top/album/{year}/{page}/",
             40,1)

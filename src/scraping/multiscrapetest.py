@@ -6,10 +6,10 @@ import time as t
 
 def main():
     scrapers = [
-        albumoftheyear.AlbumOfTheYear(None),
-        besteveralbums.BestEverAlbums(None),
-        metacritic.Metacritic(None),
-        rateyourmusic.RateYourMusic(None)]
+        albumoftheyear.AlbumOfTheYear(),
+        besteveralbums.BestEverAlbums(),
+        metacritic.MetaCritic(),
+        rateyourmusic.RateYourMusic()]
     n = len(scrapers)
     results = [None] * n
     prevtime =0

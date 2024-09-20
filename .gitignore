@@ -7,3 +7,6 @@ src/scraping/__pycache__
 /*.html
 /*.txt
 __pycache__/
+/db
+todo.md
+*test*

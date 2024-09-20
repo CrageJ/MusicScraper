@@ -10,7 +10,7 @@ import io
 class MetaCritic(Scraper):
     def __init__(self):
         super().__init__(
-            Website.METACRITIC,
+            Website.META,
             "Metacritic",
             "https://www.metacritic.com/browse/albums/score/metascore/year/filtered?year_selected={year}&distribution=&sort=desc&view=detailed&page={page}",
             100,

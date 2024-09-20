@@ -13,14 +13,14 @@ Todo
 - [ ] rateyourmusic
 
 # Database
-- [ ] Write parsed album to database
-- [ ] Write spotify data to database
-- [ ] Get album via year, top_x from database
-- [ ] Get album via website, year, top_x from database
+- [x] Write parsed album to database
+- [x] Write spotify data to database
+- [x] Get album via year, top_x from database
+- [x] Get album via website, year, top_x from database
 
 # Spotify
-- [ ] Get album info via album, artist from Spotify
-- [ ] Get artist info (genre) via artist from Spotify
+- [x] Get album info via album, artist from Spotify
+- [x] Get artist info (genre) via artist from Spotify
 
 # API
 - [ ] Get album via website(s), year, top_x
@@ -31,5 +31,7 @@ Todo
 
 # Misc
 - [ ] Route API functions to frontend
+- [ ] Headless mode for scraping
+- [ ] Demo mode
 - [ ] Render albums lists via HTMX
 - [ ] Allow reverse ordering of items

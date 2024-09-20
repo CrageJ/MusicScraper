@@ -10,7 +10,7 @@ import io
 class RateYourMusic(Scraper):
     def __init__(self):
         super().__init__(
-            Website.RATEYOURMUSIC,
+            Website.RYM,
             "Rate Your Music",
             "https://rateyourmusic.com/charts/top/album/{year}/{page}/",
             40,1)

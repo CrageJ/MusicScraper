@@ -8,7 +8,7 @@ import io
 class AlbumOfTheYear(Scraper):
     def __init__(self):
         super().__init__(
-            Website.ALBUMOFTHEYEAR,
+            Website.AOTY,
             "Album of the Year",
             "https://www.albumoftheyear.org/ratings/user-highest-rated/{year}/{page}/",
             25,1)
@@ -57,7 +57,7 @@ class AlbumOfTheYear(Scraper):
 
                     #ratings = score_container.find('div', class_='scoreText').text.strip()
                     #album['ratings'] = ratings
-                album = Album(album_name,album_artist,rank,album_score,Website.ALBUMOFTHEYEAR)
+                album = Album(album_name,album_artist,rank,album_score,Website.AOTY)
                 albums.append(album)
             return albums
         except Exception as e:

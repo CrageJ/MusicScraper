@@ -9,7 +9,7 @@ import io
 class BestEverAlbums(Scraper):
     def __init__(self):
         super().__init__(
-            Website.BESTEVERALBUMS,
+            Website.BEA,
             "Best Ever Albums",
             "https://www.besteveralbums.com/yearstats.php?y={year}&f=&fv=&orderby=InfoRankScore&sortdir=DESC&page={page}",
             10,1)

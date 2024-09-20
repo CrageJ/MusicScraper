@@ -12,6 +12,7 @@ This is a command-line interface for scraping and retrieving music album data fr
 1. Clone this repository
 2. Navigate to the project directory
 3. Run `poetry install` to install dependencies
+4. Change `.env.template` to .env. Add spotify api credentials if you choose.
 
 ## Usage
 

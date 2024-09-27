@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import io
 
 from time import sleep,time
-from typing import Optional
+from typing import Optional,Tuple
 from dataclasses import dataclass
 import logging
 
@@ -59,7 +59,7 @@ class Scraper:
 
         self.starting_page = starting_page
 
-    def scrape_top_x_between_years(self,top_x,from_year,to_year,rescrape_old_data=False):
+    def scrape_top_x_between_years(self,top_x,from_year,to_year,rescrape_old_data=False)->List[Tuple[int,List[str]]]:
         """Scrape the top X albums between years
         In the format [(year,[html_content,...]),...]
         """
@@ -90,6 +90,7 @@ class Scraper:
     def scrape_page(self,year:int,page:int) -> str: # page starts at 0
         """Scrape the page of the website"""
         page_to_scrape = page + self.starting_page
+        logging.info(f"Scraping {self.website} Year {year} Page {page}")
         try:
             scraper = cloudscraper.create_scraper(
                 interpreter="nodejs",

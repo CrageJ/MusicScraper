@@ -27,46 +27,44 @@
             </span>
         </div>
         <div class="BodyItem" style="vertical-align: text-top;">
-            <div class="filledbox" style="text-align: right;">
-                        <h2> Websites To Scrape </h2>
-                        <label for="rym">Rate Your Music</label><input type="checkbox" id="rym" name="vehicle1" value="rym"><br>
-                        <label for="aoty">Album Of The Year</label><input type="checkbox" id="aoty" name="vehicle2" value="aoty"><br>
-                        <label for="bea">Best Ever Albums</label><input type="checkbox" id="bea" name="vehicle3" value="bea"><br>
-                        <label for="meta">Metacritic</label><input type="checkbox" id="meta" name="vehicle3" value="meta">
+            <form id="scrape-form" hx-post="/scrape" hx-trigger="submit" hx-target="#list">
+                <div class="filledbox" style="text-align: right;">
+                    <h2> Websites To Scrape </h2>
+                    <label for="rym">Rate Your Music</label><input type="checkbox" id="rym" name="rym" value="on"><br>
+                    <label for="aoty">Album Of The Year</label><input type="checkbox" id="aoty" name="aoty" value="on"><br>
+                    <label for="bea">Best Ever Albums</label><input type="checkbox" id="bea" name="bea" value="on"><br>
+                    <label for="meta">Metacritic</label><input type="checkbox" id="meta" name="meta" value="on">
 
-            </div>
+                </div>
 
-            <div class="filledbox" style="text-align: right;">
-                        <h2>Between Which Years? </h2>
+                <div class="filledbox" style="text-align: right;">
+                    <h2>Between Which Years? </h2>
 
-                        <label for="from-year">From:</label>
-                        <input type="number" id="from-year" name="from-year" value="2023"> <br>
+                    <label for="from-year">From:</label>
+                    <input type="number" id="from-year" name="from-year" value="2023"> <br>
 
-                        <label for="to-year">To:  </label>
-                        <input type="number" id="to-year" name="to-year" value="2023">
-                        <br>
-                        <label for="top_x">Scraping top _ albums:</label>
+                    <label for="to-year">To:  </label>
+                    <input type="number" id="to-year" name="to-year" value="2023">
+                    <br>
+                    <label for="top_x">Scraping top _ albums:</label>
 
-                        <input type="number" id="top_x" name="to-year" value="100" max="500"><br><b>(Scraping top _ in each year)</b>
+                    <input type="number" id="top-x" name="top-x" value="10" max="500"><br><b>(Scraping top _ in each year)</b>
+                </div>
 
-            </div>
-            <div class="filledbox">
-
-                        <h2> Select Action </h2>
-                        <button hx-post="/list" hx-trigger="click" hx-target="#list">Scrape Albums</button> <br>
-                        <button hx-get="/list" hx-trigger="click" hx-target="#list">Get Albums</button> <br>
-                        <button hx-get="/list" hx-trigger="click" hx-target="#list">Scrape + Get Albums</button>
-            </div>
-
-
-
-
+                <div class="filledbox">
+                    <h2> Select Action </h2>
+                    <button type="button" hx-get="/scrape" hx-target="#scrapeStatus" hx-trigger="click" hx-include="#scrape-form">Get Albums <span id="scrapeStatus">_</span></button> <br>
+                    <button type="button" hx-get="/get" hx-target="#List" hx-trigger="click" hx-target="#list" hx-include="#scrape-form">Get Albums</button> <br>
+                </div>
+            </form>
         </div>
-    <!-- We'll add some markup soon -->
+
+
     <div class="BodyItem" id="List">
 
-
-    <ul id="list" hx-get="/list" hx-swap="innerHTML" hx-trigger="load"></ul>
     </div>
+
+    </div>
+
 </body>
 </html>

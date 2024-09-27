@@ -1,9 +1,12 @@
+from src.scraping.scraper import Album, Scraper
 import src.scraping.albumoftheyear as AOTY
 import src.scraping.besteveralbums as BEA
 import src.scraping.rateyourmusic as RYM
 import src.scraping.metacritic as META
 import src.spotify as SPOTIFY
 import src.database as DB
+
+from typing import Any, List
 
 import logging
 
@@ -20,7 +23,7 @@ class Application:
         self.meta = META.MetaCritic()
         self.spotify = SPOTIFY.Spotify()
 
-        self.scraper_list = [self.aoty,self.bea,self.rym,self.meta]
+        self.scraper_list : List[Any] = [self.aoty,self.bea,self.rym,self.meta]
         self.scraper_list_str = [Website.AOTY,Website.BEA,Website.RYM,Website.META]
         # Initialize logger
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -32,42 +35,47 @@ class Application:
 
     async def scrape_websites(self, top_x, from_year, to_year,
                             aoty=False, bea=False, rym=False, meta=False, rescrape_old_data=False):
+        logging.info ("Scraping websites")
         args = [aoty, bea, rym, meta]
         for arg, s, scraper in zip(args, self.scraper_list_str, self.scraper_list):
             if arg:
                 self.logger.info(f"Scraping {s}")
                 # In the format (website, [(year, [html_content, ...]), ...])
                 raw_data = scraper.scrape_top_x_between_years(top_x, from_year, to_year, rescrape_old_data)
-
-                for year, pages in raw_data:
+                for tup in raw_data:
+                    year, pages = tup
                     for page in pages:
-                            parsed_content = scraper.parse_html(page)
-                            for album in parsed_content:
+                        if page == '':
+                            continue
 
-                                album_name = album.album
-                                artist = album.artist
-                                rank = album.rank
-                                rating = album.rating
-                                website = album.website
+                        parsed_content : List[Album]= scraper.parse_html(page)
+                        for album in parsed_content:
 
-                                spotify_info = self.spotify.search_album(album_name, artist)
-                                if spotify_info is not None:
-                                    sp_album = spotify_info.name
-                                    sp_id = spotify_info.spotify_id
-                                    sp_artists = spotify_info.artists
-                                    sp_total_tracks = spotify_info.total_tracks
-                                    sp_genres = spotify_info.genres
-                                    sp_release_date = spotify_info.release_date
-                                    sp_image_url = spotify_info.image_url
+                            album_name = album.album
+                            artist = album.artist
+                            rank = album.rank
+                            rating = album.rating
+                            website = album.website
 
-                                    await self.db.insert_spotify(sp_id, sp_album, ", ".join(sp_artists),", ".join(sp_genres), sp_release_date, sp_image_url)
-                                    await self.db.insert_text_to_spotify(album_name, artist, sp_id)
+                            spotify_info : SPOTIFY.SpotifyItem= self.spotify.search_album(album_name, artist)
+                            if spotify_info is not None:
+                                sp_album = spotify_info.name
+                                sp_id = spotify_info.spotify_id
+                                sp_artists = spotify_info.artists
+                                sp_total_tracks = spotify_info.total_tracks
+                                sp_genres = spotify_info.genres
+                                sp_release_date = spotify_info.release_date
+                                sp_image_url = spotify_info.image_url
 
-                                await self.db.insert_album(website, year, rank, album_name, artist)
+                                await self.db.insert_spotify(sp_id, sp_album, ", ".join(sp_artists),", ".join(sp_genres), sp_release_date, sp_image_url)
+                                await self.db.insert_text_to_spotify(album_name, artist, sp_id)
+
+                            await self.db.insert_album(website, year, rank, album_name, artist)
 
 
     async def get_content(self, top_x, from_year, to_year,
                                   aoty=False, bea=False, rym=False, meta=False):
+        logging.info ("Getting Content")
         result = []
         websites = []
         if aoty:
@@ -84,35 +92,35 @@ class Application:
 
         if albums is not None:
             for album in albums:
-                website, year, rank, album_name, artist,genres,release_date,img_url = album
+                try:
+                    website, year, rank, album_name, artist,genres,release_date,img_url = album
 
-                # Only include albums from the specified websites
-                if Website(website) not in websites:
-                    continue
+                    # Get Spotify information
+                    spotify_info = await self.db.get_spotify(album_name, artist)
 
-                # Get Spotify information
-                spotify_info = await self.db.get_spotify(album_name, artist)
-
-                album_data = {
-                    "website": website,
-                    "year": year,
-                    "rank": rank,
-                    "album": album_name,
-                    "artist": artist,
-                    "img_url": img_url,
-                    "spotify": None
-                }
-
-                if spotify_info:
-                    spotify_id, sp_album, sp_artist, genres, release_date, image_url = spotify_info
-                    album_data["spotify"] = {
-                        "id": spotify_id,
-                        "album": sp_album,
-                        "artist": sp_artist,
-                        "genres": genres,
-                        "release_date": release_date,
-                        "image_url": image_url
+                    album_data = {
+                        "website": website,
+                        "year": year,
+                        "rank": rank,
+                        "album": album_name,
+                        "artist": artist,
+                        "img_url": img_url,
+                        "spotify": None
                     }
+
+                    if spotify_info:
+                        spotify_id, sp_album, sp_artist, genres, release_date, image_url = spotify_info
+                        album_data["spotify"] = {
+                            "id": spotify_id,
+                            "album": sp_album,
+                            "artist": sp_artist,
+                            "genres": genres,
+                            "release_date": release_date,
+                            "image_url": image_url
+                        }
+                except Exception as e:
+                    logging.error(f"Error in getting content: {e}")
+                    continue
 
                 result.append(album_data)
 
@@ -123,6 +131,7 @@ class Application:
 
     async def get_aggregated_content(self, top_x, from_year, to_year,
                                     aoty=True, bea=True, rym=True, meta=True):
+        logging.info ("Getting Aggregated Content")
         result = []
         websites = []
         if aoty:

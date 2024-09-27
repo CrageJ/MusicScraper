@@ -4,7 +4,10 @@ from functools import wraps
 from pathlib import Path
 from typing import List, Optional
 
+from typing import Iterable, List, Optional
+
 import aiosqlite
+from aiosqlite import Row
 from src.schema import SQL
 
 def get_db_folder():
@@ -28,9 +31,9 @@ class Database:
     async def connect(self):
         self.db = await aiosqlite.connect(self.db_path)
 
-    async def execute(self, sql, values: tuple | List[tuple] | None, fetch: str = "none"):
+    async def execute(self, sql, values: tuple | List[tuple] | None, fetch: str = "none") -> Row | Iterable[Row] | None:
         if self.db is None or fetch not in ["none", "one", "all"]:
-            return False
+            return None
         async with self.db.cursor() as cursor:
             try:
                 if values is None:
@@ -41,20 +44,20 @@ class Database:
                     await cursor.executemany(sql, values)
                 else:
                     raise ValueError("Invalid type for values parameter")
-
+                result=None
                 if fetch == "one":
                     result = await cursor.fetchone()
                 elif fetch == "all":
                     result = await cursor.fetchall()
                 else:
-                    result = True
+                    result = None
 
                 await self.db.commit()
                 return result
             except Exception as e:
                 logging.error(f"Error executing SQL: {e}")
                 await self.db.rollback()
-                return False
+                return None
 
 
 
@@ -74,13 +77,26 @@ class Database:
         return await self.execute(SQL.insert_text_to_spotify, (album, artist, spotify_id))
 
     async def get_spotify(self, album: str, artist: str):
-        return await self.execute(SQL.get_spotify, (album, artist), "one")
+        ret = await self.execute(SQL.get_spotify, (album, artist), "one")
+        if ret is None:
+            logging.error(f"Spotify data not found for {album} by {artist}")
+            ret = []
+        return ret
 
     async def get_albums_range_top_x(self, start_year: int, end_year: int, top_rank: int):
-        return await self.execute(SQL.get_albums_range_top_x, (start_year, end_year, top_rank), "all")
+        print(start_year, end_year, top_rank,type(start_year),type(end_year),type(top_rank))
+        ret = await self.execute(SQL.get_albums_range_top_x, (start_year, end_year, top_rank), "all")
+        if ret is None:
+            logging.error(f"Data not found between {start_year} and {end_year} for top {top_rank} albums")
+            ret = []
+        return ret
 
     async def get_albums_aggregated(self, start_year: int, end_year: int):
-        return await self.execute(SQL.get_albums_aggregated, (start_year, end_year), "all")
+        ret = await self.execute(SQL.get_albums_aggregated, (start_year, end_year), "all")
+        if ret is None:
+            logging.error(f"Aggregated Data not found between {start_year} and {end_year}")
+            ret = []
+        return ret
 
 
 

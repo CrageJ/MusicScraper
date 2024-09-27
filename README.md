@@ -2,6 +2,11 @@
 
 This is a command-line interface for scraping and retrieving music album data from various websites.
 
+Features:
+- Scrapes the top x rated albums for any year from 4 different music rating websites
+
+
+
 ## Prerequisites
 
 - Python 3.10+

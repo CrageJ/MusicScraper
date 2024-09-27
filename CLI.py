@@ -19,11 +19,12 @@ async def main():
     parser.add_argument('--bea', action='store_true', help='Include Best Ever Albums')
     parser.add_argument('--rym', action='store_true', help='Include Rate Your Music')
     parser.add_argument('--meta', action='store_true', help='Include Metacritic')
+    parser.add_argument('--json', action='store_true', help='Formats output as json')
     args = parser.parse_args()
-    # currently, only aoty works
-    args.bea = False
+    # currently, rym does not work
+
     args.rym = False
-    args.meta = False
+
 
 
     app : App.Application = App.Application(args.appname)
@@ -36,17 +37,27 @@ async def main():
         print('Retrieving Content...')
         data = await get_content(app, args.from_year, args.to_year, args.top_x, args.aoty, args.bea, args.rym, args.meta)
         print('Retrieval Complete')
-        fmt = json.dumps(data)
-        print(fmt)
+        if data:
+            if args.json:
+                prettified_json = json.dumps(data, indent=4, sort_keys=True, ensure_ascii=False)
+                print(prettified_json)
+            else:
+                print_list(data)
     elif args.command == 'get_aggregated_content':
         print('Retrieving Aggregated Content...')
         data = await get_aggregated_content(app, args.from_year, args.to_year, args.top_x, args.aoty, args.bea, args.rym, args.meta)
         print('Retrieval Complete')
-        fmt = json.dumps(data)
-        print(fmt)
+        if data:
+            if args.json:
+                prettified_json = json.dumps(data, indent=4, sort_keys=True, ensure_ascii=False)
+                print(prettified_json)
+            else:
+                print_list(data)
     logging.info('Closing Application')
 
-
+def print_list(data):
+    for item in data:
+        print(item)
 
 async def scrape(app: App.Application ,top_x,from_year,to_year,aoty,bea,rym,meta):
     await app.scrape_websites(top_x, from_year, to_year, aoty,bea,rym,meta)

@@ -5,7 +5,7 @@ from src.scraping.scraper import *
 import cloudscraper
 from bs4 import BeautifulSoup
 import io
-
+import re
 class BestEverAlbums(Scraper):
     def __init__(self):
         super().__init__(
@@ -14,47 +14,51 @@ class BestEverAlbums(Scraper):
             "https://www.besteveralbums.com/yearstats.php?y={year}&f=&fv=&orderby=InfoRankScore&sortdir=DESC&page={page}",
             10,1)
 
-    def parse_html(self,response:str) -> Optional[List[Album]]: # page at 0
+    def parse_html(self,response:str) -> List[Album]: # page at 0
+        if response == '':
+            return []
         try:
-            #get_html() -> str
-            # Assuming the HTML content is stored in a variable called 'html_content'
-            html_content = open("out.html","r",encoding='utf-8')
-            soup = BeautifulSoup(html_content, 'html.parser')
-
-            # Find all album list rows
-            album_rows = soup.find_all('div', class_='albumListRow')
-
+            soup = BeautifulSoup(response, 'html.parser')
             albums = []
 
-            for row in album_rows:
-                album = {}
+            for rank, album_div in enumerate(soup.find_all('div', class_='chartrow'), 1):
+                try:
+                    # Album title
+                    title_elem = album_div.find('a', class_='nav2emph bigger')
+                    title = ''
+                    if title_elem:
+                        title = title_elem.text.strip()
 
-                # Extract rank
-                rank = row.find('span', class_='albumListRank').text.strip().rstrip('.')
+                    # Artist
+                    artist_elem = album_div.find('div', class_='chart-title-col chartstring').find('a', class_='nav2emph bigger')
+                    artist = ''
+                    if artist_elem:
+                        artist = artist_elem.text.strip()
 
-                album_rank = int(rank)
+                    rank = 0
+                    average_rating = 0
 
-                # Extract title and artist
-                title_element = row.find('h2', class_='albumListTitle')
-
-                album_name = title_element.find('a').text.strip()
-
-                # Extract release date
-                album_release_date = row.find('div', class_='albumListDate').text.strip()
-                album_score = 0
-
-                # Extract user score
-                score_container = row.find('div', class_='albumListScoreContainer')
-                if score_container:
-                    score = score_container.find('div', class_='scoreValue').text.strip()
-                    album_score = int(score)
-
-                    #ratings = score_container.find('div', class_='scoreText').text.strip()
-                    #album['ratings'] = ratings
-
-                album = ()
-                albums.append(album)
+                    # Additional stats
+                    stats_div = album_div.find('div', class_='chart-stats')
+                    if stats_div:
+                        for stat in stats_div.find_all('div', class_='chartstring'):
+                            key = stat.text.strip(':')
+                            value = stat.find_next_sibling('div', class_='chart-stats-metric')
+                            if value:
+                                value = value.text.strip()
+                                if key == 'Overall Rank':
+                                    rank = value.split()[-1]
+                                elif key == 'Average Rating':
+                                    parts = value.split()
+                                    if len(parts) >= 2:
+                                        average_rating = parts[0]
+                    album = Album(title, artist, rank, average_rating, Website.BEA)
+                    albums.append(album)
+                except Exception as e:
+                    logging.error(f"Error parsing album: {e}")
+                    continue
             return albums
+
         except Exception as e:
-            print(e)
-            return None
+            logging.error(f"Error parsing album: {e}")
+            return []

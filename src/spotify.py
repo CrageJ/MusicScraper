@@ -40,23 +40,29 @@ def compose_search_query(album, artist):
     return f"album:{album} artist:{artist}"
 
 class Spotify:
-    def __init__(self):
-        load_dotenv(".env")  # take environment variables from .env.
-        self.client_id = os.getenv("SPOTIPY_CLIENT_ID")
-        self.client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
-        # redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
+    def __init__(self,connect=True):
+        self.isConnected = connect
+        self.client_id = "0"
+        self.client_secret = "0"
+        if connect:
+            load_dotenv(".env")  # take environment variables from .env.
+            self.client_id = os.getenv("SPOTIPY_CLIENT_ID")
+            self.client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+            # redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
 
-        if not all([self.client_id, self.client_secret]):
-            raise ValueError("Missing Spotify credentials in .env file")
+            if not all([self.client_id, self.client_secret]):
+                raise ValueError("Missing Spotify credentials in .env file")
 
-        client_credentials_manager = SpotifyClientCredentials(client_id=self.client_id, client_secret=self.client_secret)
+            client_credentials_manager = SpotifyClientCredentials(client_id=self.client_id, client_secret=self.client_secret)
+            self.sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-        self.sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
     # search album is a lot less likely to return false info than get_artist_info. therefore, if search_album returns none, do not use info from get_artist_info
     def get_artist_info(self, artist):
         default = {"artist": artist, "genres": [], "id": 0}
+        if not self.isConnected:
+            return default
         try:
             response = self.sp.search(artist, limit=1, type="artist")
             if response is None:
@@ -72,8 +78,11 @@ class Spotify:
             logging.error(f"Error getting artist info for {artist}: {e}")
             return default
         return default
+
     def search_album(self, album, artist):
         default = SpotifyItem(album,[''],0,0,'',[''],'')
+        if not self.isConnected:
+            return default
         try:
             query = compose_search_query(album, artist)
             response = self.sp.search(query, type="album", limit=1)

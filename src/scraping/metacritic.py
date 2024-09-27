@@ -18,47 +18,49 @@ class MetaCritic(Scraper):
 
 
 
-    def parse_html(self,response:str) -> Optional[List[Album]]: # page at 0
+    def parse_html(self,response:str) -> List[Album]: # page at 0
+        if response == '':
+            return []
         try:
-            #get_html() -> str
             # Assuming the HTML content is stored in a variable called 'html_content'
-            html_content = open("out.html","r",encoding='utf-8')
-            soup = BeautifulSoup(html_content, 'html.parser')
-
-            # Find all album list rows
-            album_rows = soup.find_all('div', class_='albumListRow')
+            soup = BeautifulSoup(response, 'html.parser')
 
             albums = []
 
-            for row in album_rows:
-                album = {}
+            for item in soup.find_all('div', class_='item'):
+                try:
+                    album = {}
 
-                # Extract rank
-                rank = row.find('span', class_='albumListRank').text.strip().rstrip('.')
+                    # Extract title
+                    title_elem = item.find('div', class_='title')
+                    title = ''
+                    if title_elem:
+                        title = title_elem.text.strip()
+                    # Extract rank
+                    rank = 0
+                    rank_elem = item.find('span', class_='title numbered')
+                    if rank_elem:
+                        rank = rank_elem.text.strip().rstrip('.')
 
-                album_rank = int(rank)
+                    # Extract artist
+                    artist_elem = item.find('div', class_='artist')
+                    artist = ''
+                    if artist_elem:
+                        artist = artist_elem.text.strip()
 
-                # Extract title and artist
-                title_element = row.find('h2', class_='albumListTitle')
+                    rating = 0
+                    # Extract User Score
+                    user_score_elem = item.find('span', class_='metascore_w user')
+                    if user_score_elem:
+                        rating = user_score_elem.text.strip()
 
-                album_name = title_element.find('a').text.strip()
+                    a = Album(title, artist, rank, rating, Website.META)
 
-                # Extract release date
-                album_release_date = row.find('div', class_='albumListDate').text.strip()
-                album_score = 0
-
-                # Extract user score
-                score_container = row.find('div', class_='albumListScoreContainer')
-                if score_container:
-                    score = score_container.find('div', class_='scoreValue').text.strip()
-                    album_score = int(score)
-
-                    #ratings = score_container.find('div', class_='scoreText').text.strip()
-                    #album['ratings'] = ratings
-
-                album = ()
-                albums.append(album)
+                    albums.append(album)
+                except Exception as e:
+                    logging.error(f"Error parsing album: {e}")
+                    continue
             return albums
         except Exception as e:
-            print(e)
-            return None
+            logging.error(f"Error parsing album: {e}")
+            return []

@@ -1,3 +1,9 @@
+# Music Scraper website
+
+```
+poetry run fastapi dev backendLauncher.py
+```
+
 # Music Scraper CLI
 
 This is a command-line interface for scraping and retrieving music album data from various websites.
